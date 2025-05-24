@@ -180,6 +180,11 @@ namespace Garnet.server
         public bool GrowIndexesIfNeeded(CancellationToken token = default);
 
         /// <summary>
+        /// Executes a store-wide object collect operation
+        /// </summary>
+        public void ExecuteObjectCollection();
+
+        /// <summary>
         /// Start object size trackers for all active databases
         /// </summary>
         public void StartObjectSizeTrackers(CancellationToken token = default);
@@ -251,6 +256,6 @@ namespace Garnet.server
         /// </summary>
         /// <param name="dbId">Database ID</param>
         /// <returns>Functions state</returns>
-        internal FunctionsState CreateFunctionsState(int dbId = 0);
+        internal FunctionsState CreateFunctionsState(int dbId = 0, byte respProtocolVersion = ServerOptions.DEFAULT_RESP_VERSION);
     }
 }

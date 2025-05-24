@@ -506,6 +506,21 @@ namespace Garnet.server
         }
 
         /// <inheritdoc/>
+        public override void ExecuteObjectCollection()
+        {
+            var databasesMapSnapshot = databases.Map;
+
+            var activeDbIdsMapSize = activeDbIds.ActualSize;
+            var activeDbIdsMapSnapshot = activeDbIds.Map;
+
+            for (var i = 0; i < activeDbIdsMapSize; i++)
+            {
+                var dbId = activeDbIdsMapSnapshot[i];
+                ExecuteObjectCollection(databasesMapSnapshot[dbId], Logger);
+            }
+        }
+
+        /// <inheritdoc/>
         public override void StartObjectSizeTrackers(CancellationToken token = default)
         {
             sizeTrackersStarted = true;
@@ -636,14 +651,14 @@ namespace Garnet.server
         public override IDatabaseManager Clone(bool enableAof) => new MultiDatabaseManager(this, enableAof);
 
         /// <inheritdoc/>
-        public override FunctionsState CreateFunctionsState(int dbId = 0)
+        public override FunctionsState CreateFunctionsState(int dbId = 0, byte respProtocolVersion = ServerOptions.DEFAULT_RESP_VERSION)
         {
             var db = TryGetOrAddDatabase(dbId, out var success, out _);
             if (!success)
                 throw new GarnetException($"Database with ID {dbId} was not found.");
 
             return new(db.AppendOnlyFile, db.VersionMap, StoreWrapper.customCommandManager, null, db.ObjectStoreSizeTracker,
-                StoreWrapper.GarnetObjectSerializer);
+                StoreWrapper.GarnetObjectSerializer, respProtocolVersion);
         }
 
         /// <inheritdoc/>
